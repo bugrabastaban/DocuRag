@@ -1,0 +1,80 @@
+# Environments
+.env
+.env.*
+!.env.example
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+__pypackages__/
+
+# Logs & Databases
+*.log
+logs/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# Secrets & Keys
+*.pem
+*.key
+secrets.toml
+client_secret.json
+credentials.json
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Node/Frontend (Gelecekte eklenebilir diye)
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+dist/
+build/
+out/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

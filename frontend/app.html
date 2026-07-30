@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuRAG - App</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bg-primary': '#10141A',
+                        'bg-surface': '#171D26',
+                        'border-subtle': '#2A323D',
+                        'text-primary': '#E8EAED',
+                        'text-muted': '#8B94A3',
+                        'accent-signal': '#E8A33D',
+                        'accent-data': '#5FB3B3'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Özel Stiller -->
+    <style>
+        body {
+            background-color: theme('colors.bg-primary');
+            color: theme('colors.text-primary');
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Scrollbar stilleri */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.border-subtle');
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.text-muted');
+        }
+
+        .input-field {
+            background-color: theme('colors.bg-primary');
+            border: 1px solid theme('colors.border-subtle');
+            color: theme('colors.text-primary');
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: theme('colors.accent-signal');
+            box-shadow: 0 0 0 1px theme('colors.accent-signal');
+        }
+        
+        .btn-primary {
+            background-color: theme('colors.accent-signal');
+            color: #10141A;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="h-[60px] shrink-0 border-b border-border-subtle bg-surface px-6 flex items-center justify-between">
+        <div class="heading text-xl font-bold tracking-tight text-text-primary">DocuRAG</div>
+        <div class="flex items-center gap-4 text-sm">
+            <span class="text-text-muted" id="user-email-display">user@example.com</span>
+            <a href="#" id="logout-btn" class="text-accent-signal hover:underline font-medium">Çıkış Yap</a>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_320px] overflow-hidden">
+        
+        <!-- Left Panel: Dökümanlarım -->
+        <aside class="bg-surface border-r border-border-subtle flex flex-col hidden md:flex">
+            <div class="p-4 border-b border-border-subtle flex items-center justify-between">
+                <h2 class="heading font-semibold text-text-primary">Dökümanlarım</h2>
+                <input type="file" id="file-upload-input" class="hidden" />
+                <button id="upload-btn" class="text-accent-signal hover:opacity-80 transition-opacity font-medium text-sm flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    Yükle
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-2">
+                <ul id="document-list" class="space-y-1">
+                    <!-- Placeholder Item (Ready) -->
+                    <li class="group cursor-pointer rounded-md p-3 flex items-center gap-3 transition-colors hover:bg-bg-primary">
+                        <div class="w-2 h-2 rounded-full bg-accent-data"></div>
+                        <span class="text-sm font-medium text-text-primary truncate">quarterly_report_2024.pdf</span>
+                    </li>
+                    
+                    <!-- Placeholder Item (Processing) -->
+                    <li class="group cursor-pointer rounded-md p-3 flex items-center gap-3 transition-colors hover:bg-bg-primary">
+                        <div class="w-2 h-2 rounded-full bg-accent-signal animate-pulse"></div>
+                        <span class="text-sm font-medium text-text-muted truncate">company_policies.docx</span>
+                    </li>
+
+                    <!-- Placeholder Item (Active/Selected) -->
+                    <li class="relative cursor-pointer rounded-md p-3 flex items-center gap-3 bg-bg-primary">
+                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-2/3 bg-accent-signal rounded-r-md"></div>
+                        <div class="w-2 h-2 rounded-full bg-accent-data ml-1"></div>
+                        <span class="text-sm font-medium text-text-primary truncate">project_alpha_specs.pdf</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Middle Panel: Chat Area -->
+        <section class="bg-primary flex flex-col min-h-0">
+            <!-- Chat Header -->
+            <div class="p-4 border-b border-border-subtle flex items-center">
+                <h3 class="font-medium text-text-primary truncate" id="current-doc-title">project_alpha_specs.pdf</h3>
+            </div>
+            
+            <!-- Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-6">
+                <!-- System Message -->
+                <div class="flex justify-start">
+                    <div class="max-w-[80%]">
+                        <div class="bg-surface border border-border-subtle rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-text-primary leading-relaxed shadow-sm">
+                            Merhaba! project_alpha_specs.pdf dökümanı hakkında bana soru sorabilirsiniz.
+                        </div>
+                        <div class="mt-1.5 ml-1 text-[10px] text-text-muted font-mono">10:42 AM</div>
+                    </div>
+                </div>
+
+                <!-- User Message -->
+                <div class="flex justify-end">
+                    <div class="max-w-[80%] flex flex-col items-end">
+                        <div class="bg-accent-signal text-[#10141A] rounded-2xl rounded-tr-sm px-4 py-3 text-sm font-medium leading-relaxed shadow-sm">
+                            Projenin temel hedefleri nelerdir?
+                        </div>
+                        <div class="mt-1.5 mr-1 text-[10px] text-text-muted font-mono">10:45 AM</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 bg-primary border-t border-border-subtle">
+                <div class="relative flex items-center">
+                    <input type="text" id="chat-input" placeholder="Dökümanda ara veya soru sor..." class="input-field w-full pl-4 pr-12 py-3 rounded-xl text-sm shadow-sm" autocomplete="off">
+                    <button id="send-btn" class="absolute right-2 p-2 text-accent-signal hover:text-text-primary transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Panel: Retrieval Trace -->
+        <aside class="bg-surface border-l border-border-subtle hidden md:flex flex-col">
+            <div class="p-4 border-b border-border-subtle">
+                <h2 class="text-xs font-semibold text-text-muted uppercase tracking-widest">Retrieval Trace</h2>
+            </div>
+            
+            <div id="retrieval-trace" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Placeholder Chunk 1 -->
+                <div class="space-y-2">
+                    <div class="text-xs font-mono text-text-muted line-clamp-3 bg-bg-primary p-2 rounded border border-border-subtle">
+                        ...project alpha primarily focuses on reducing latency by 40% across all API endpoints...
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-bg-primary rounded-full overflow-hidden">
+                            <div class="h-full bg-accent-data rounded-full" style="width: 85%;"></div>
+                        </div>
+                        <span class="text-[10px] font-mono text-accent-data">0.85</span>
+                    </div>
+                </div>
+
+                <!-- Placeholder Chunk 2 -->
+                <div class="space-y-2">
+                    <div class="text-xs font-mono text-text-muted line-clamp-3 bg-bg-primary p-2 rounded border border-border-subtle">
+                        ...the secondary goal is to ensure 99.99% uptime during peak business hours through automated scaling...
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-1.5 bg-bg-primary rounded-full overflow-hidden">
+                            <div class="h-full bg-accent-data rounded-full" style="width: 72%;"></div>
+                        </div>
+                        <span class="text-[10px] font-mono text-accent-data">0.72</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script src="static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuRAG - Giriş</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN & Config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bg-primary': '#10141A',
+                        'bg-surface': '#171D26',
+                        'border-subtle': '#2A323D',
+                        'text-primary': '#E8EAED',
+                        'text-muted': '#8B94A3',
+                        'accent-signal': '#E8A33D',
+                        'accent-data': '#5FB3B3'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Özel Stiller -->
+    <style>
+        body {
+            background-color: theme('colors.bg-primary');
+            color: theme('colors.text-primary');
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* 
+         * Background Waveform Animation 
+         * Kartın solunda düşük saydamlıklı sinyal barları
+         */
+        .waveform-container {
+            position: absolute;
+            left: 10%;
+            bottom: 20%;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            height: 200px;
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        
+        .bar {
+            width: 3px;
+            background-color: theme('colors.accent-data');
+            border-radius: 9999px;
+            animation: bounce 2s infinite ease-in-out alternate;
+        }
+        
+        .bar:nth-child(1) { height: 40px; animation-delay: 0s; }
+        .bar:nth-child(2) { height: 90px; animation-delay: 0.3s; }
+        .bar:nth-child(3) { height: 140px; animation-delay: 0.6s; }
+        .bar:nth-child(4) { height: 70px; animation-delay: 0.9s; }
+        .bar:nth-child(5) { height: 110px; animation-delay: 1.2s; }
+        
+        @keyframes bounce {
+            0% { transform: scaleY(0.7); }
+            100% { transform: scaleY(1.3); }
+        }
+
+        /* 
+         * Auth Card
+         */
+        .auth-card {
+            background-color: theme('colors.bg-surface');
+            border: 1px solid theme('colors.border-subtle');
+            border-radius: 1rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            z-index: 10;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-field {
+            background-color: theme('colors.bg-primary');
+            border: 1px solid theme('colors.border-subtle');
+            color: theme('colors.text-primary');
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: theme('colors.accent-signal');
+            box-shadow: 0 0 0 1px theme('colors.accent-signal');
+        }
+        
+        .btn-primary {
+            background-color: theme('colors.accent-signal');
+            color: #10141A; /* Koyu zemin rengini kontrast için metin olarak aldık */
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Arka plan detay -->
+    <div class="waveform-container">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+    </div>
+
+    <!-- Login/Register Kartı -->
+    <div class="auth-card relative">
+        <div class="text-center mb-8">
+            <h1 class="heading text-4xl font-bold text-text-primary mb-2 tracking-tight">DocuRAG</h1>
+            <p class="text-text-muted text-sm font-medium">Multi-user document intelligence</p>
+        </div>
+
+        <form id="auth-form" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-text-muted mb-1.5">Email</label>
+                <input type="email" id="email" required class="input-field w-full px-4 py-2.5 rounded-lg text-sm" placeholder="isim@sirket.com">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-text-muted mb-1.5">Şifre</label>
+                <input type="password" id="password" required class="input-field w-full px-4 py-2.5 rounded-lg text-sm" placeholder="••••••••">
+            </div>
+            
+            <button type="submit" id="submit-btn" class="btn-primary w-full py-3 rounded-lg font-bold text-sm mt-4 shadow-lg shadow-accent-signal/20">
+                Giriş Yap
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <button id="toggle-mode-btn" class="text-sm text-text-muted hover:text-accent-signal transition-colors font-medium">
+                Hesabın yok mu? Kayıt Ol
+            </button>
+        </div>
+
+        <!-- Hata mesajı alanı -->
+        <div id="error-message" class="mt-5 text-center text-sm text-red-400 font-medium hidden">
+            <!-- Fetch sonrası hata buraya yazılacak -->
+        </div>
+    </div>
+
+    <script>
+        let isLoginMode = true;
+        
+        const form = document.getElementById('auth-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const toggleModeBtn = document.getElementById('toggle-mode-btn');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Mod Değiştirme (Login <-> Register)
+        toggleModeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            
+            if (isLoginMode) {
+                submitBtn.textContent = 'Giriş Yap';
+                toggleModeBtn.textContent = 'Hesabın yok mu? Kayıt Ol';
+            } else {
+                submitBtn.textContent = 'Kayıt Ol';
+                toggleModeBtn.textContent = 'Zaten hesabın var mı? Giriş Yap';
+            }
+            
+            errorMessage.classList.add('hidden');
+            errorMessage.textContent = '';
+        });
+
+        // Form Gönderme
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const endpoint = isLoginMode 
+                ? 'http://127.0.0.1:8000/auth/login' 
+                : 'http://127.0.0.1:8000/auth/register';
+            
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = 'İşleniyor...';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            errorMessage.classList.add('hidden');
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Beklenmeyen bir hata oluştu.');
+                }
+                
+                if (data.access_token) {
+                    // Token varsa kaydet ve yönlendir
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('userEmail', email);
+                    window.location.href = 'app.html';
+                } else if (!isLoginMode) {
+                    // Kayıt oldu ama backend token dönmediyse (bazı api'ler böyledir)
+                    alert("Kayıt başarılı! Lütfen giriş yapın.");
+                    toggleModeBtn.click();
+                }
+                
+            } catch (err) {
+                // Hata mesajını göster
+                errorMessage.textContent = err.message;
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // Butonu eski haline getir
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        });
+    </script>
+</body>
+</html>
