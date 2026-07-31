@@ -8,7 +8,13 @@ app = FastAPI(title="DocuRAG API", description="Document QA with RAG")
 # CORS (Cross-Origin Resource Sharing) ayarları
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Frontend'in yerel dosyadan erişebilmesi için * yapıyoruz
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+        "http://127.0.0.1:8080",
+        "http://localhost:8080",
+        "https://docu-rag-kappa.vercel.app"
+    ], # Frontend'e erişim yetkisi verilen adresler
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -175,6 +175,7 @@
         </div>
     </div>
 
+    <script src="static/config.js"></script>
     <script>
         let isLoginMode = true;
         
@@ -207,9 +208,10 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
+            const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
             const endpoint = isLoginMode 
-                ? 'http://127.0.0.1:8000/auth/login' 
-                : 'http://127.0.0.1:8000/auth/register';
+                ? `${baseUrl}/auth/login` 
+                : `${baseUrl}/auth/register`;
             
             const originalBtnText = submitBtn.textContent;
             submitBtn.textContent = 'İşleniyor...';
